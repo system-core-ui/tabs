@@ -75,6 +75,41 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
       return () => observer.disconnect();
     }, [updateScrollButtons]);
 
+    useEffect(() => {
+      if (listRef.current && variant === 'scrollable') {
+        // Wait for rendering tick to ensure active attribute is flushed to DOM
+        const timeoutId = setTimeout(() => {
+          if (!listRef.current) return;
+          const activeTab = listRef.current.querySelector<HTMLElement>('[aria-selected="true"]');
+          if (activeTab) {
+            const container = listRef.current;
+            if (orientation === 'horizontal') {
+              const tabLeft = activeTab.offsetLeft;
+              const tabWidth = activeTab.offsetWidth;
+              const containerWidth = container.clientWidth;
+              const containerScrollLeft = container.scrollLeft;
+
+              if (tabLeft < containerScrollLeft || tabLeft + tabWidth > containerScrollLeft + containerWidth) {
+                const targetScrollLeft = tabLeft - containerWidth / 2 + tabWidth / 2;
+                container.scrollTo({ left: Math.max(0, targetScrollLeft), behavior: 'smooth' });
+              }
+            } else {
+              const tabTop = activeTab.offsetTop;
+              const tabHeight = activeTab.offsetHeight;
+              const containerHeight = container.clientHeight;
+              const containerScrollTop = container.scrollTop;
+
+              if (tabTop < containerScrollTop || tabTop + tabHeight > containerScrollTop + containerHeight) {
+                const targetScrollTop = tabTop - containerHeight / 2 + tabHeight / 2;
+                container.scrollTo({ top: Math.max(0, targetScrollTop), behavior: 'smooth' });
+              }
+            }
+          }
+        }, 50);
+        return () => clearTimeout(timeoutId);
+      }
+    }, [currentValue, variant, orientation]);
+
     const handleScroll = () => {
       updateScrollButtons();
     };
