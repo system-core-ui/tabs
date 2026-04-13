@@ -115,7 +115,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
 
     const scroll = (direction: 'left' | 'right') => {
       if (listRef.current) {
-        const amount = orientation === 'vertical' ? listRef.current.clientHeight * 0.8 : listRef.current.clientWidth * 0.8;
+        const amount = orientation === 'vertical' ? listRef.current.clientHeight / 2 : listRef.current.clientWidth / 2;
         if (orientation === 'vertical') {
           listRef.current.scrollBy({ top: direction === 'left' ? -amount : amount, behavior: 'smooth' });
         } else {
