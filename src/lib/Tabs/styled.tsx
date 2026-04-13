@@ -111,3 +111,27 @@ export const TabPanelRootStyled = styled.div<TabsOwnerState>(
     };
   }
 );
+
+export const TabsScrollButtonStyled = styled.div<{ ownerOrientation?: 'horizontal' | 'vertical', ownerDisabled?: boolean }>(
+  ({ ownerOrientation, ownerDisabled }): CSSObject => {
+    const { palette }: ThemeSchema = useTheme();
+    return {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: ownerOrientation === 'vertical' ? '100%' : 40,
+      height: ownerOrientation === 'vertical' ? 40 : 'auto',
+      alignSelf: 'stretch',
+      cursor: ownerDisabled ? 'default' : 'pointer',
+      opacity: ownerDisabled ? 0.3 : 1,
+      color: palette?.text?.secondary || 'rgba(0,0,0,0.54)',
+      flexShrink: 0,
+      zIndex: 2,
+      transition: 'color 0.2s, background-color 0.2s',
+      '&:hover': {
+        color: ownerDisabled ? undefined : palette?.text?.primary || 'rgba(0,0,0,0.87)',
+        backgroundColor: ownerDisabled ? undefined : palette?.action?.hover || 'rgba(0,0,0,0.04)',
+      }
+    };
+  }
+);

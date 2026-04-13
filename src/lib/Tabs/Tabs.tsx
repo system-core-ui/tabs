@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, forwardRef, useCallback, useRef, useEffect } from 'react';
 import type { TabsProps } from '../models';
-import { TabsRootStyled, TabsListStyled } from './styled';
-import { IconButton } from '@thanh-libs/button';
+import { TabsRootStyled, TabsListStyled, TabsScrollButtonStyled } from './styled';
 
 interface TabsContextType {
   value: string | number | undefined;
@@ -154,13 +153,12 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
           {...rest}
         >
           {isScrollable && canScrollLeft && (
-            <IconButton 
-              size="sm" 
-              onClick={() => scroll('left')} 
-              style={{ flexShrink: 0, zIndex: 1, boxShadow: '0 0 4px rgba(0,0,0,0.2)' }}
+            <TabsScrollButtonStyled 
+              ownerOrientation={orientation}
+              onClick={() => scroll('left')}
             >
               <ChevronLeft />
-            </IconButton>
+            </TabsScrollButtonStyled>
           )}
           
           <TabsListStyled
@@ -176,13 +174,12 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
           </TabsListStyled>
 
           {isScrollable && canScrollRight && (
-            <IconButton 
-              size="sm" 
-              onClick={() => scroll('right')} 
-              style={{ flexShrink: 0, zIndex: 1, boxShadow: '0 0 4px rgba(0,0,0,0.2)' }}
+            <TabsScrollButtonStyled 
+              ownerOrientation={orientation}
+              onClick={() => scroll('right')}
             >
               <ChevronRight />
-            </IconButton>
+            </TabsScrollButtonStyled>
           )}
         </TabsRootStyled>
       </TabsContext.Provider>
