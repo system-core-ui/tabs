@@ -120,7 +120,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
         >
           {isScrollable && canScrollLeft && (
             <IconButton 
-              size="small" 
+              size="sm" 
               onClick={() => scroll('left')} 
               style={{ flexShrink: 0, zIndex: 1, boxShadow: '0 0 4px rgba(0,0,0,0.2)' }}
             >
@@ -142,7 +142,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
 
           {isScrollable && canScrollRight && (
             <IconButton 
-              size="small" 
+              size="sm" 
               onClick={() => scroll('right')} 
               style={{ flexShrink: 0, zIndex: 1, boxShadow: '0 0 4px rgba(0,0,0,0.2)' }}
             >
