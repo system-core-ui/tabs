@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, forwardRef, useCallback } from 'react';
+import React, { createContext, useContext, useState, forwardRef, useCallback, useRef, useEffect } from 'react';
 import type { TabsProps } from '../models';
 import { TabsRootStyled, TabsListStyled } from './styled';
+import { IconButton } from '@thanh-libs/button';
 
 interface TabsContextType {
   value: string | number | undefined;
@@ -18,6 +19,13 @@ export const useTabsContext = () => {
   }
   return context;
 };
+
+const ChevronLeft = () => (
+  <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" style={{ width: '1.25rem', height: '1.25rem', fill: 'currentColor' }}><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/></svg>
+);
+const ChevronRight = () => (
+  <svg focusable="false" aria-hidden="true" viewBox="0 0 24 24" style={{ width: '1.25rem', height: '1.25rem', fill: 'currentColor' }}><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/></svg>
+);
 
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
   (
@@ -38,6 +46,50 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
 
     const currentValue = isControlled ? valueProp : internalValue;
 
+    const listRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const updateScrollButtons = useCallback(() => {
+      if (listRef.current && variant === 'scrollable') {
+        const { scrollTop, scrollHeight, clientHeight, scrollLeft, scrollWidth, clientWidth } = listRef.current;
+        if (orientation === 'vertical') {
+          setCanScrollLeft(scrollTop > 0);
+          setCanScrollRight(scrollTop + clientHeight < scrollHeight - 1);
+        } else {
+          setCanScrollLeft(scrollLeft > 0);
+          setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 1);
+        }
+      } else {
+        setCanScrollLeft(false);
+        setCanScrollRight(false);
+      }
+    }, [variant, orientation]);
+
+    useEffect(() => {
+      updateScrollButtons();
+      const observer = new ResizeObserver(() => updateScrollButtons());
+      if (listRef.current) {
+        observer.observe(listRef.current);
+      }
+      return () => observer.disconnect();
+    }, [updateScrollButtons]);
+
+    const handleScroll = () => {
+      updateScrollButtons();
+    };
+
+    const scroll = (direction: 'left' | 'right') => {
+      if (listRef.current) {
+        const amount = orientation === 'vertical' ? listRef.current.clientHeight * 0.8 : listRef.current.clientWidth * 0.8;
+        if (orientation === 'vertical') {
+          listRef.current.scrollBy({ top: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+        } else {
+          listRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+        }
+      }
+    };
+
     const handleChange = useCallback(
       (newValue: string | number) => {
         if (!isControlled) {
@@ -47,6 +99,8 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
       },
       [isControlled, onChange]
     );
+
+    const isScrollable = variant === 'scrollable';
 
     return (
       <TabsContext.Provider
@@ -61,16 +115,40 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(
           ref={ref}
           ownerOrientation={orientation}
           className={className}
+          style={{ display: 'flex', flexDirection: orientation === 'vertical' ? 'column' : 'row', alignItems: 'center', width: '100%', position: 'relative' }}
           {...rest}
         >
+          {isScrollable && canScrollLeft && (
+            <IconButton 
+              size="small" 
+              onClick={() => scroll('left')} 
+              style={{ flexShrink: 0, zIndex: 1, boxShadow: '0 0 4px rgba(0,0,0,0.2)' }}
+            >
+              <ChevronLeft />
+            </IconButton>
+          )}
+          
           <TabsListStyled
+            ref={listRef}
+            onScroll={handleScroll}
             role="tablist"
             aria-orientation={orientation}
             ownerOrientation={orientation}
             ownerVariant={variant}
+            style={{ flexGrow: 1, ...(isScrollable ? { overflow: 'hidden' } : {}) }}
           >
             {children}
           </TabsListStyled>
+
+          {isScrollable && canScrollRight && (
+            <IconButton 
+              size="small" 
+              onClick={() => scroll('right')} 
+              style={{ flexShrink: 0, zIndex: 1, boxShadow: '0 0 4px rgba(0,0,0,0.2)' }}
+            >
+              <ChevronRight />
+            </IconButton>
+          )}
         </TabsRootStyled>
       </TabsContext.Provider>
     );
